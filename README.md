@@ -1,6 +1,6 @@
 # Memory Reactivation Localization
 
-基于 PB2023 EEG 的记忆再激活解码工具。Python 包名为 `memory_reactivation`，安装包名为 `memory-reactivation`，命令入口为 `pb-eeg`。
+用于 EEG 记忆再激活分析的解码工具。Python 包名为 `memory_reactivation`，安装包名为 `memory-reactivation`。
 
 通过统一的数据、模型和训练接口完成 Choice、Pitch、Motor 解码，并支持逐时间点分类、trial 级分类、注意力分析和可视化。
 
@@ -41,7 +41,7 @@ tests/              单元测试和合成数据回归测试
    source .venv/bin/activate
    python -m pip install -e '.[test]'
 
-   pb-eeg --help
+   python -m memory_reactivation --help
    ```
 
    SwanLab 日志依赖通过以下命令安装。
@@ -52,12 +52,12 @@ tests/              单元测试和合成数据回归测试
 
    | 命令 | 用途 |
    | --- | --- |
-   | `pb-eeg prepare` | 构建 manifest、数据划分和归一化统计 |
-   | `pb-eeg train` | 根据 YAML 配置训练指定任务和一折 |
-   | `pb-eeg inspect` | 查看 checkpoint、模型构造信息和参数规模 |
-   | `pb-eeg predict` | 对预处理后的 EEG NPZ 执行批量预测 |
-   | `pb-eeg reexport` | 重新推理、导出评估 CSV 并绘图 |
-   | `pb-eeg report` | 从已有 CSV 生成图表 |
+   | `python -m memory_reactivation prepare` | 构建 manifest、数据划分和归一化统计 |
+   | `python -m memory_reactivation train` | 根据 YAML 配置训练指定任务和一折 |
+   | `python -m memory_reactivation inspect` | 查看 checkpoint、模型构造信息和参数规模 |
+   | `python -m memory_reactivation predict` | 对预处理后的 EEG NPZ 执行批量预测 |
+   | `python -m memory_reactivation reexport` | 重新推理、导出评估 CSV 并绘图 |
+   | `python -m memory_reactivation report` | 从已有 CSV 生成图表 |
 
    各子命令均支持 `--help`。
 
@@ -83,7 +83,7 @@ tests/              单元测试和合成数据回归测试
    block-CV 在各被试内部划分 block，归一化使用训练数据估计。
 
    ```bash
-   pb-eeg prepare --preprocessed-root data/preprocessed \
+   python -m memory_reactivation prepare --preprocessed-root data/preprocessed \
      --artifact-dir artifacts --cv-folds 5 --cv-strategy block \
      --cv-output-dir artifacts/cv5 --seed 42
    ```
@@ -91,7 +91,7 @@ tests/              单元测试和合成数据回归测试
    subject-CV 按被试划分，使用训练被试估计全局归一化统计。
 
    ```bash
-   pb-eeg prepare --preprocessed-root data/preprocessed \
+   python -m memory_reactivation prepare --preprocessed-root data/preprocessed \
      --artifact-dir artifacts --cv-folds 5 --cv-strategy subject \
      --normalization-mode train_global \
      --cv-output-dir artifacts/cv5-subject-seed42 --seed 42
@@ -160,6 +160,9 @@ tests/              单元测试和合成数据回归测试
    run:
      base_output_dir: ./runs
      base_experiment_name: choice-cnn
+
+   swanlab:
+     enabled: false
    ```
 
    `data` 定义样本选择、划分和归一化，`model` 定义模型结构，`train` 定义优化与监督，`plots` 定义图表，`run` 定义运行目录。
@@ -171,16 +174,16 @@ tests/              单元测试和合成数据回归测试
 4. 训练和恢复。
 
    ```bash
-   PB2023_SWANLAB_ENABLED=0 pb-eeg train \
+   python -m memory_reactivation train \
      --config /path/to/train.yaml --task choice --cv-fold 0
    ```
 
-   `--task` 可选择 `choice`、`pitch` 或 `motor`，`--cv-fold` 从 0 开始指定一折，`--lag` 可覆盖配置中的 lag。`PB2023_SWANLAB_ENABLED=0` 关闭该次运行的 SwanLab 日志。
+   `--task` 可选择 `choice`、`pitch` 或 `motor`，`--cv-fold` 从 0 开始指定一折，`--lag` 可覆盖配置中的 lag。`swanlab.enabled` 控制训练日志。
 
    恢复训练使用该运行的配置与 checkpoint。
 
    ```bash
-   PB2023_SWANLAB_ENABLED=0 pb-eeg train \
+   python -m memory_reactivation train \
      --config /path/to/train.yaml --task choice --cv-fold 0 \
      --resume-from /path/to/run/last.ckpt
    ```
@@ -200,7 +203,7 @@ tests/              单元测试和合成数据回归测试
 5. 载入模型和预测。
 
    ```bash
-   pb-eeg inspect /path/to/run/best_val.ckpt
+   python -m memory_reactivation inspect /path/to/run/best_val.ckpt
    ```
 
    ```python
@@ -227,7 +230,7 @@ tests/              单元测试和合成数据回归测试
    `noise_pad` 模型需要 `exp`、`subject_id`、`trial0` 三个非负整数数组，以便按物理 trial 身份生成稳定补边。
 
    ```bash
-   pb-eeg predict /path/to/run/best_val.ckpt \
+   python -m memory_reactivation predict /path/to/run/best_val.ckpt \
      --input /path/to/prepared_eeg.npz \
      --output /path/to/predictions.npz \
      --batch-size 64 --device cpu
@@ -240,13 +243,13 @@ tests/              单元测试和合成数据回归测试
    重新计算验证集并生成图表。
 
    ```bash
-   pb-eeg reexport --run-dir /path/to/run --splits val
+   python -m memory_reactivation reexport --run-dir /path/to/run --splits val
    ```
 
    一次导出原始输入、Gaussian、时间打乱和时间平移四种条件。
 
    ```bash
-   pb-eeg reexport --run-dir /path/to/run --splits val \
+   python -m memory_reactivation reexport --run-dir /path/to/run --splits val \
      --input-kinds real gaussian time_shuffle time_roll \
      --time-shuffle-seed 42 --time-roll-shift-s 0.5 \
      --controls-output-dir /path/to/control-results
@@ -257,7 +260,7 @@ tests/              单元测试和合成数据回归测试
    已有 CSV 通过 `report` 生成图表。
 
    ```bash
-   pb-eeg report --run-dir /path/to/run --splits val \
+   python -m memory_reactivation report --run-dir /path/to/run --splits val \
      --output-dir /path/to/figures
    ```
 
