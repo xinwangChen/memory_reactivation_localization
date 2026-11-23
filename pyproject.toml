@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pb2023-eeg"
+version = "0.1.0"
+description = "Unified PB2023 EEG models, training and evaluation"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.3", "numpy", "scipy", "pandas", "PyYAML", "matplotlib", "tqdm", "scikit-learn"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+logging = ["swanlab"]
+
+[project.scripts]
+pb-eeg = "pb2023_eeg.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pb2023_eeg*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["reference: requires local historical checkpoint bundles"]
+

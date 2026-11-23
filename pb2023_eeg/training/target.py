@@ -1,0 +1,10 @@
+"""Compatibility facade. New code imports trainer, objectives and evaluation directly."""
+from pb2023_eeg.analysis.curves import attention_shape_diagnostics
+from pb2023_eeg.data.transforms import EVALUATION_INPUT_KINDS, _stable_evaluation_seed, gaussian_like_eeg, time_roll_eeg, time_shuffle_eeg
+from pb2023_eeg.evaluation.export import _write_subject_metrics, export_target_outputs
+from pb2023_eeg.models.adapters import _model_task_class_count, _model_task_class_indices
+from pb2023_eeg.training.diagnostics import finalize_target_augmentation_diagnostics, target_augmentation_diagnostic_totals
+from pb2023_eeg.training.objectives.target import TARGET_AUGMENTATION_PROBE_RATIOS, _bce_pos_weight, _masked_position_loss_mean, _normalize_bce_pos_weight, _one_vs_rest_targets, _task_class_logits, _topk_count, attention_kl_to_uniform, attention_mask_penalty, attention_smoothness_penalty, attention_topk_clean_time_loss, attention_topk_schedule, attention_topk_time_bce_loss, attention_topk_time_loss, classification_branch_loss, evidence_margin, evidence_margin_over_time, focal_bce_loss_values, invalid_core_time_bce_loss, normalize_focal_alpha, normalize_focal_gamma, normalize_invalid_time_loss_scope, normalize_loss_type, one_vs_rest_loss, probability_margin, probability_margin_over_time, resolve_bce_pos_weights, resolve_focal_params, resolve_focal_train_config, score_mode_for_loss_type, target_time_receptive_field_layers, topk_covered_time_bce_loss
+from pb2023_eeg.training.precision import autocast_context
+from pb2023_eeg.training.state import CyclingDataLoader
+from pb2023_eeg.training.trainer import _prefixed, fit_target_decoder, resolve_checkpoint_metric, run_target_epoch, update_checkpoint_state

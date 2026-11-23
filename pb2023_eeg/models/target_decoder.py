@@ -1,0 +1,2 @@
+"""Historical import path; no separate implementation."""
+from .target import *
