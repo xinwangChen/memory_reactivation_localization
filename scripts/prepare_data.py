@@ -1,5 +1,5 @@
 """Compatibility command; use pb-eeg for installed entry points."""
-from pb2023_eeg.workflows.prepare import *
+from memory_reactivation.workflows.prepare import *
 
 if __name__ == "__main__":
     main()

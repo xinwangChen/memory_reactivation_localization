@@ -1,23 +1,22 @@
 """Analytical gradients, mask routing, old-config compatibility and real fit wiring."""
 from copy import deepcopy
-from pathlib import Path
 import csv
 import math
 
 import pytest
 import torch
 from torch import nn
-import yaml
+from regression.helpers_smoke import target_test_config
 
-from pb2023_eeg.training.attention_regularization import (
+from memory_reactivation.training.attention_regularization import (
     clean_attention_penalty,
     normalize_clean_attention_penalty_config,
 )
-from pb2023_eeg.training.augmentation import TemporalCropNoiseResult
-from pb2023_eeg.training.common import load_checkpoint, validate_resume_config
-from pb2023_eeg.training import trainer as training
-from pb2023_eeg.training.swanlab_logger import target_swanlab_metrics
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.training.augmentation import TemporalCropNoiseResult
+from memory_reactivation.training.common import load_checkpoint, validate_resume_config
+from memory_reactivation.training import trainer as training
+from memory_reactivation.training.swanlab_logger import target_swanlab_metrics
+from memory_reactivation.workflows.train import build_model
 
 
 @pytest.mark.parametrize('name', ['weight', 'probability'])
@@ -216,7 +215,7 @@ def test_actual_training_masks_labels_near_full_noise_and_independent_weight():
 def test_disabled_and_validation_paths_never_sample(monkeypatch, disabled):
     model = Probe()
     def must_not_run(*args, **kwargs): raise AssertionError('Unexpected clean attention sampling')
-    monkeypatch.setattr('pb2023_eeg.training.step.clean_attention_penalty', must_not_run)
+    monkeypatch.setattr('memory_reactivation.training.step.clean_attention_penalty', must_not_run)
     rng = torch.get_rng_state()
     result = epoch(model, weight=0. if disabled == 'weight' else 2.,
                    probability=0. if disabled == 'probability' else .1,
@@ -256,9 +255,8 @@ def test_actual_final_weights_and_signed_magnitude_feed_the_penalty(activation, 
 
 @pytest.mark.parametrize('task', ['choice', 'pitch'])
 @pytest.mark.parametrize('protocol', ['block', 'subject'])
-def test_four_selected_baseline_models_fit_and_record_the_new_configuration(tmp_path, task, protocol):
-    path = Path(__file__).resolve().parents[2] / 'configs' / 'noise-pad' / f'{task}-{protocol}.yaml'
-    config = yaml.safe_load(path.read_text())
+def test_target_task_and_cv_variants_fit_and_record_the_new_configuration(tmp_path, task, protocol):
+    config = target_test_config(task, protocol)
     config['model']['subject_conditioning']['resolved_training_subject_ids'] = list(range(24))
     config['train'].update(iterations=2, validation_interval_iterations=1, log_interval_iterations=1,
         lr_schedule_iterations=2, warmup_iterations=0,
@@ -361,7 +359,7 @@ def test_active_sampling_resumes_with_identical_model_rng_and_csv(tmp_path, monk
 
 
 def test_rf_aware_uses_the_existing_contaminated_halo(monkeypatch):
-    from pb2023_eeg.training.augmentation import classify_temporal_coverage
+    from memory_reactivation.training.augmentation import classify_temporal_coverage
     config = dict(encoder=dict(in_channels=2, latent_dim=4, num_blocks=1, kernel_size=3),
         attention_mode='gated_scorer', attention_gate_activation='tanh_plus_one',
         classifier_num_layers=1, classifier_dropout=0.)
@@ -376,7 +374,7 @@ def test_rf_aware_uses_the_existing_contaminated_halo(monkeypatch):
     def spy(weights, indices, contaminated, **kwargs):
         captured.append(contaminated.clone())
         return real_penalty(weights, indices, contaminated, **kwargs)
-    monkeypatch.setattr('pb2023_eeg.training.step.clean_attention_penalty', spy)
+    monkeypatch.setattr('memory_reactivation.training.step.clean_attention_penalty', spy)
     epoch(model, eeg_augmenter=LocalNoise(), noise_supervision_mode='rf_aware')
     covered = torch.zeros(3, 6, dtype=torch.bool); covered[:, 2] = True
     rf = training.target_time_receptive_field_layers(model)

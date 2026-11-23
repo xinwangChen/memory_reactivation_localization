@@ -13,15 +13,15 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from pb2023_eeg.data.dataset import LagDecodingDataset, make_batch_sampler
-from pb2023_eeg.data.manifest import build_manifest, write_block_splits
-from pb2023_eeg.data.normalization import compute_normalization_stats
-from pb2023_eeg.models.encoder import EEGEncoder, TemporalResidualBlock
-from pb2023_eeg.models.target_decoder import TargetAttentionDecoder, TimeAttentionPooling
-from pb2023_eeg.training.augmentation import EEGInputAugmenter, build_eeg_augmenter
-from pb2023_eeg.training.common import scheduled_iteration_learning_rate
-from pb2023_eeg.training.swanlab_logger import SwanLabLogger, target_swanlab_metrics
-from pb2023_eeg.training.target import (
+from memory_reactivation.data.dataset import LagDecodingDataset, make_batch_sampler
+from memory_reactivation.data.manifest import build_manifest, write_block_splits
+from memory_reactivation.data.normalization import compute_normalization_stats
+from memory_reactivation.models.encoder import EEGEncoder, TemporalResidualBlock
+from memory_reactivation.models.target_decoder import TargetAttentionDecoder, TimeAttentionPooling
+from memory_reactivation.training.augmentation import EEGInputAugmenter, build_eeg_augmenter
+from memory_reactivation.training.common import scheduled_iteration_learning_rate
+from memory_reactivation.training.swanlab_logger import SwanLabLogger, target_swanlab_metrics
+from memory_reactivation.training.target import (
     attention_shape_diagnostics,
     attention_topk_time_loss,
     export_target_outputs,
@@ -31,7 +31,7 @@ from pb2023_eeg.training.target import (
     target_augmentation_diagnostic_totals,
     update_checkpoint_state,
 )
-from pb2023_eeg.workflows.report import (
+from memory_reactivation.workflows.report import (
     TIME_ACCURACY_DISPLAY_SMOOTHING_WINDOW_S,
     _activation_summary,
     _activation_ylabel,
@@ -41,11 +41,37 @@ from pb2023_eeg.workflows.report import (
     _time_accuracy_summary,
     plot_target_run,
 )
-from pb2023_eeg.workflows.reexport import (
+from memory_reactivation.workflows.reexport import (
     _gaussian_baseline_explicitly_disabled,
     _remove_stale_gaussian_exports,
 )
-from pb2023_eeg.workflows.train import resolve_attention_window, resolve_single_lag
+from memory_reactivation.workflows.train import resolve_attention_window, resolve_single_lag
+
+
+def target_test_config(task="choice", protocol="block", encoder_type="window_transformer"):
+    """Small synthetic configuration covering Target and subject-CV behavior."""
+    encoder = dict(type=encoder_type, in_channels="auto", latent_dim=8, dropout=0.)
+    if encoder_type == "cnn":
+        encoder.update(num_blocks=1, kernel_size=3, expansion_ratio=2)
+    else:
+        encoder.update(num_layers=1, window_size=3, num_heads=2, ffn_ratio=2,
+                       attention_pattern="centered_local", position_encoding_mode="sinusoidal_qk",
+                       boundary_mode="noise_pad", boundary_noise_seed=42)
+    return dict(
+        seed=42, task=task, data=dict(cv_strategy=protocol),
+        model=dict(encoder=encoder, attention_mode="gated_scorer", attention_dim=8,
+                   attention_score_centering=True, attention_gate_activation="tanh_plus_one",
+                   time_no_class_enabled=True, classifier_num_layers=1, classifier_dropout=0.,
+                   subject_conditioning=dict(enabled=True, embedding_dim=4,
+                       mode="shared_plus_residual" if protocol == "subject" else "individual"),
+                   fusion=dict(enabled=False)),
+        train=dict(iterations=2, validation_interval_iterations=1, log_interval_iterations=1,
+                   learning_rate=.001, lr_schedule="constant", amp=False, progress_bar=False,
+                   loss_type="bce_one_vs_rest", pooled_loss_type="focal_bce",
+                   time_loss_weight=.5, pooled_loss_weight=1., fusion_loss_weight=0.,
+                   invalid_time_loss_weight=0., attention_topk_ratio=.8,
+                   checkpoint_metric="val_pooled_accuracy", checkpoint_mode="max",
+                   temporal_crop_noise=dict(enabled=False, sample_interval_s=.01)))
 
 
 class TargetPipelineSmokeTest(unittest.TestCase):

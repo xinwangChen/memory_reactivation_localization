@@ -2,9 +2,9 @@ import json
 
 import pytest
 
-from pb2023_eeg.data.normalization import compute_normalization_stats, load_normalization_stats, validate_normalization_identity
+from memory_reactivation.data.normalization import compute_normalization_stats, load_normalization_stats, validate_normalization_identity
 from .helpers_subject_cv import _bundle
-from pb2023_eeg.data.manifest import write_block_cv_splits
+from memory_reactivation.data.manifest import write_block_cv_splits
 
 
 def test_per_subject_statistics_reject_another_fold_and_allow_record_subsets(tmp_path):

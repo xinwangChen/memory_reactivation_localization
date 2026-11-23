@@ -11,9 +11,9 @@ import sys
 import numpy as np
 import torch
 
-import pb2023_eeg
-from pb2023_eeg.artifacts.checkpoints import load_model
-from pb2023_eeg.artifacts.provenance import file_sha256, implementation_identity
+import memory_reactivation
+from memory_reactivation.artifacts.checkpoints import load_model
+from memory_reactivation.artifacts.provenance import file_sha256, implementation_identity
 
 
 def main():
@@ -29,7 +29,7 @@ def main():
         parser.error("--reference-dir must contain reference_validation.json")
     args.out.mkdir(parents=True, exist_ok=True)
     torch.set_num_threads(1)
-    assert Path(pb2023_eeg.__file__).resolve().is_relative_to(project / "pb2023_eeg")
+    assert Path(memory_reactivation.__file__).resolve().is_relative_to(project / "memory_reactivation")
     references = []
     environment = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "OMP_NUM_THREADS": "1",
                    "MKL_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "PYTHONDONTWRITEBYTECODE": "1"}
@@ -74,7 +74,7 @@ def main():
                         "strict": True, "exact": True, "max_abs_errors": errors,
                         "embedding_capacity": model.spec.embedding_capacity})
         print(row["key"] + ": strict load; exact CPU forward", flush=True)
-    report = {"status": "passed", "count": len(results), "package_origin": pb2023_eeg.__file__,
+    report = {"status": "passed", "count": len(results), "package_origin": memory_reactivation.__file__,
               "implementation": implementation_identity(), "models": results}
     (args.out / "checkpoint_compatibility.json").write_text(json.dumps(report, indent=2) + "\n")
 

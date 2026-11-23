@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from pb2023_eeg.training.common import atomic_torch_save, load_checkpoint, save_checkpoint
+from memory_reactivation.training.common import atomic_torch_save, load_checkpoint, save_checkpoint
 
 
 def test_atomic_checkpoint_round_trip(tmp_path: Path) -> None:
@@ -33,9 +33,9 @@ def test_interrupted_save_preserves_previous_checkpoint(tmp_path, monkeypatch, e
         raise OSError("simulated storage failure")
 
     target = {
-        "serialization": "pb2023_eeg.training.common.torch.save",
-        "sync": "pb2023_eeg.training.common.os.fsync",
-        "replacement": "pb2023_eeg.training.common.os.replace",
+        "serialization": "memory_reactivation.training.common.torch.save",
+        "sync": "memory_reactivation.training.common.os.fsync",
+        "replacement": "memory_reactivation.training.common.os.replace",
     }[failure]
     monkeypatch.setattr(target, fail_write if failure == "serialization" else fail)
     with pytest.raises(OSError):
@@ -68,7 +68,7 @@ def test_training_checkpoint_records_actual_selection_identity(tmp_path: Path) -
 
 @pytest.mark.parametrize('saved_enabled,current_enabled', [(False, True), (True, True), (True, False), (False, False)])
 def test_scaler_resume_supports_device_precision_transitions(tmp_path, saved_enabled, current_enabled):
-    from pb2023_eeg.training.common import load_training_checkpoint
+    from memory_reactivation.training.common import load_training_checkpoint
     model = torch.nn.Linear(2, 2)
     optimizer = torch.optim.AdamW(model.parameters())
     saved = torch.amp.GradScaler('cpu', enabled=saved_enabled, init_scale=16.)

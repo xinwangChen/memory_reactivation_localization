@@ -5,9 +5,9 @@ from copy import deepcopy
 import pytest
 import torch
 
-from pb2023_eeg.training.common import load_checkpoint
-from pb2023_eeg.training.target import fit_target_decoder
-from pb2023_eeg.workflows.train import build_model as build_target
+from memory_reactivation.training.common import load_checkpoint
+from memory_reactivation.training.target import fit_target_decoder
+from memory_reactivation.workflows.train import build_model as build_target
 
 
 @pytest.fixture(params=["target"])

@@ -8,9 +8,9 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from pb2023_eeg.data.dataset import SubjectArrayStore
-from pb2023_eeg.data.manifest import SubjectRecord
-from pb2023_eeg.data.offline_cache import load_offline_cache, offline_cache_path
+from memory_reactivation.data.dataset import SubjectArrayStore
+from memory_reactivation.data.manifest import SubjectRecord
+from memory_reactivation.data.offline_cache import load_offline_cache, offline_cache_path
 
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def test_legacy_cache_is_not_trusted_or_overwritten(inputs):
 
 
 def test_partial_publication_is_rebuilt_and_complete_cache_is_reused(inputs, monkeypatch):
-    import pb2023_eeg.data.offline_cache as module
+    import memory_reactivation.data.offline_cache as module
     record, _, cache = inputs
     cache.mkdir()
     path = offline_cache_path(record, cache, None, "replace")
@@ -109,7 +109,7 @@ def test_graph_contents_and_mode_have_separate_correct_caches(inputs):
 
 
 def test_source_changed_during_decompression_is_not_published(inputs, monkeypatch):
-    import pb2023_eeg.data.offline_cache as module
+    import memory_reactivation.data.offline_cache as module
     record, _, cache = inputs
     def changed(values, graph, mode):
         replace_eeg(record, 9.0)
@@ -122,7 +122,7 @@ def test_source_changed_during_decompression_is_not_published(inputs, monkeypatc
 
 
 def test_verified_mmaps_survive_lru_eviction_without_rehashing(inputs, monkeypatch):
-    import pb2023_eeg.data.dataset as module
+    import memory_reactivation.data.dataset as module
     record, norm, cache = inputs
     store = SubjectArrayStore([record], norm, offline_cache_dir=cache)
     expected = store.get_normalized(0, 0).clone()
@@ -151,7 +151,7 @@ def test_serialized_store_reopens_and_verifies_readonly_files(inputs, corrupt):
 
 
 def test_file_identity_does_not_trust_even_unchanged_ctime(tmp_path, monkeypatch):
-    from pb2023_eeg.utils import source_files
+    from memory_reactivation.utils import source_files
     path = tmp_path / "same-stat.bin"
     path.write_bytes(b"1111")
     stamp = source_files._stamp(path)

@@ -7,15 +7,15 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from pb2023_eeg.data.spatial import (
+from memory_reactivation.data.spatial import (
     DEFAULT_ELECTRODES,
     GraphLaplacian,
     atomic_json,
     build_graph,
     graph_options,
 )
-from pb2023_eeg.data.normalization import load_normalization_stats
-from pb2023_eeg.utils.run import snapshot_data_artifacts, validate_snapshot_data_artifacts
+from memory_reactivation.data.normalization import load_normalization_stats
+from memory_reactivation.utils.run import snapshot_data_artifacts, validate_snapshot_data_artifacts
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from pb2023_eeg.training.target import (
+from memory_reactivation.training.target import (
     attention_mask_penalty,
     attention_smoothness_penalty,
 )

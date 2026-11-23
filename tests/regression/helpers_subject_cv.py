@@ -13,22 +13,22 @@ import numpy as np
 import pytest
 import torch
 
-from pb2023_eeg.data.configured import (
+from memory_reactivation.data.configured import (
     build_lag_dataset, configure_cross_validation, validate_data_protocol,
     validate_subject_cv_datasets,
 )
-from pb2023_eeg.data.manifest import (
+from memory_reactivation.data.manifest import (
     SubjectRecord, load_split_map, read_csv_rows, subject_split_membership,
     write_block_cv_splits, write_csv_rows, write_subject_cv_splits,
 )
-from pb2023_eeg.data.normalization import (
+from memory_reactivation.data.normalization import (
     compute_normalization_stats, load_normalization_stats, validate_normalization_identity,
 )
-from pb2023_eeg.data.spatial import GraphLaplacian, configure_spatial_preprocessing
-from pb2023_eeg.data.subject_conditioning import configure_training_subject_conditioning
-from pb2023_eeg.models.subject_conditioning import SharedResidualSubjectEmbedding
-from pb2023_eeg.training.common import validate_checkpoint_cv_identity
-from pb2023_eeg.utils.config import load_yaml, save_yaml
+from memory_reactivation.data.spatial import GraphLaplacian, configure_spatial_preprocessing
+from memory_reactivation.data.subject_conditioning import configure_training_subject_conditioning
+from memory_reactivation.models.subject_conditioning import SharedResidualSubjectEmbedding
+from memory_reactivation.training.common import validate_checkpoint_cv_identity
+from memory_reactivation.utils.config import load_yaml, save_yaml
 
 
 def _record(root, index, *, channels=2, trials=20):

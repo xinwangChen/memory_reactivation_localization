@@ -9,19 +9,19 @@ import torch
 from torch import nn
 import yaml
 
-from pb2023_eeg.artifacts.checkpoints import load_model, save_model
-from pb2023_eeg.artifacts.exports import describe_export, copy_verified_exports
-from pb2023_eeg.config import parse_request
-from pb2023_eeg.contracts import PredictionSpec
-from pb2023_eeg.evaluation.export import export_target_outputs
-from pb2023_eeg.evaluation.predict import iter_predictions
-from pb2023_eeg.models.encoder import RightLocalTransformerBlock, build_eeg_encoder
-from pb2023_eeg.models.adapters import boundary_noise_forward_kwargs, forward_batch
-from pb2023_eeg.models.factory import build_model as build_target
-from pb2023_eeg.training.common import load_checkpoint, validate_resume_config
-from pb2023_eeg.training.trainer import run_target_epoch
-from pb2023_eeg.training import trainer as training
-from pb2023_eeg.workflows import evaluate
+from memory_reactivation.artifacts.checkpoints import load_model, save_model
+from memory_reactivation.artifacts.exports import describe_export, copy_verified_exports
+from memory_reactivation.config import parse_request
+from memory_reactivation.contracts import PredictionSpec
+from memory_reactivation.evaluation.export import export_target_outputs
+from memory_reactivation.evaluation.predict import iter_predictions
+from memory_reactivation.models.encoder import RightLocalTransformerBlock, build_eeg_encoder
+from memory_reactivation.models.adapters import boundary_noise_forward_kwargs, forward_batch
+from memory_reactivation.models.factory import build_model as build_target
+from memory_reactivation.training.common import load_checkpoint, validate_resume_config
+from memory_reactivation.training.trainer import run_target_epoch
+from memory_reactivation.training import trainer as training
+from memory_reactivation.workflows import evaluate
 
 def encoder_config(**overrides):
     config = dict(type="window_transformer", in_channels=3, latent_dim=8,

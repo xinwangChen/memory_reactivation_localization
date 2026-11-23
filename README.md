@@ -1,8 +1,8 @@
 # Memory Reactivation Localization
 
-PB2023 EEG 解码工具，Python 包名为 `pb2023_eeg`，命令入口为 `pb-eeg`。
+PB2023 EEG 解码工具，Python 包名为 `memory_reactivation`，命令入口为 `pb-eeg`。
 
-Target 主线覆盖数据准备、CNN / Patch MLP / 局部 Transformer 建模、被试条件化、注意力与门控、时间分类头与 pooled 分类头、训练、评估、导出和可视化。任务包括 Choice、Pitch 和 Motor。现有主线配方覆盖 Choice / Pitch 的 block-CV 与 subject-CV，并提供对应的 `noise_pad` 配方。
+Target 主线覆盖数据准备、CNN / Patch MLP / 局部 Transformer 建模、被试条件化、注意力与门控、时间分类头与 pooled 分类头、训练、评估、导出和可视化。任务包括 Choice、Pitch 和 Motor。支持 block-CV、subject-CV 与 `noise_pad` 噪声补边实验。
 
 历史模型兼容层支持 Target 与原生 spatial baseline 的严格加载和预测。baseline / downstream 训练、定位标注、遮罩与跨实验调度列入后续迁移范围。
 
@@ -28,7 +28,7 @@ python -m pip install -e '.[logging]'
 目录组织如下。
 
 ```text
-pb2023_eeg/
+memory_reactivation/
   models/           编码器、条件化、注意力、分类头和模型工厂
   data/             样本、CV、归一化、空间处理与缓存
   training/         增强、目标函数、单 batch 计算和 trainer
@@ -37,14 +37,13 @@ pb2023_eeg/
   visualization/    图形绘制
   artifacts/        模型保存、加载和导出身份校验源码
   workflows/        数据准备、训练、评估、重导出与报告
-configs/            实验配方
 scripts/            兼容命令入口和历史对照工具
 tests/              单元测试与合成数据回归测试
 ```
 
 数据按实验组织到 `data/preprocessed/`，例如 `Exp1/Sub01_eeg_clean.npz` 与 `Exp1/Sub01_meta.csv`。Graph Laplacian 使用与 EEG 通道顺序匹配的电极文件 `data/preprocessed/electrodes/Exp1_electrodes.npz`。
 
-配方中的相对路径以 YAML 所在目录为基准。默认使用仓库根目录下的 `artifacts/`、`cache/` 和 `runs/` 保存预处理产物、缓存与训练结果。这些目录由运行过程生成，Git 忽略规则覆盖相应文件。
+训练使用 `--config` 指定外部 YAML 配置，相对路径以 YAML 所在目录为基准。可以使用仓库根目录下的 `artifacts/`、`cache/` 和 `runs/` 保存预处理产物、缓存与训练结果。这些目录由运行过程生成，Git 忽略规则覆盖相应文件。
 
 先生成五折划分和训练集归一化统计。
 
@@ -59,11 +58,11 @@ pb-eeg prepare --preprocessed-root data/preprocessed \
   --cv-output-dir artifacts/cv5-subject-seed42 --seed 42
 ```
 
-随后选择任务和一折训练。完整命令与数据约定见 [USAGE.md](USAGE.md)。
+随后使用自己的训练配置选择任务和一折训练。完整命令与数据约定见 [USAGE.md](USAGE.md)。
 
 ```bash
 PB2023_SWANLAB_ENABLED=0 pb-eeg train \
-  --config configs/noise-pad/pitch-subject.yaml --task pitch --cv-fold 0
+  --config /path/to/pitch-subject.yaml --task pitch --cv-fold 0
 
 pb-eeg inspect /path/to/run/best_val.ckpt
 pb-eeg reexport --run-dir /path/to/run --splits val

@@ -12,19 +12,19 @@ import torch
 from torch.utils.data import DataLoader
 import yaml
 
-from pb2023_eeg.artifacts.checkpoints import load_model, save_model
-from pb2023_eeg.artifacts.exports import copy_verified_exports, describe_export
-from pb2023_eeg.artifacts.provenance import data_identity, digest, file_sha256
-from pb2023_eeg.config import parse_request
-from pb2023_eeg.contracts import PredictionSpec
-from pb2023_eeg.data.dataset import LagDecodingDataset
-from pb2023_eeg.data.spatial import build_graph
-from pb2023_eeg.evaluation.export import export_target_outputs
-from pb2023_eeg.evaluation.predict import iter_predictions
-from pb2023_eeg.models.factory import build_model
-from pb2023_eeg.training.common import build_optimizer, validate_resume_config
-from pb2023_eeg.training.trainer import fit_target_decoder
-from pb2023_eeg.workflows import evaluate
+from memory_reactivation.artifacts.checkpoints import load_model, save_model
+from memory_reactivation.artifacts.exports import copy_verified_exports, describe_export
+from memory_reactivation.artifacts.provenance import data_identity, digest, file_sha256
+from memory_reactivation.config import parse_request
+from memory_reactivation.contracts import PredictionSpec
+from memory_reactivation.data.dataset import LagDecodingDataset
+from memory_reactivation.data.spatial import build_graph
+from memory_reactivation.evaluation.export import export_target_outputs
+from memory_reactivation.evaluation.predict import iter_predictions
+from memory_reactivation.models.factory import build_model
+from memory_reactivation.training.common import build_optimizer, validate_resume_config
+from memory_reactivation.training.trainer import fit_target_decoder
+from memory_reactivation.workflows import evaluate
 from regression.helpers_smoke import TargetPipelineSmokeTest
 
 
@@ -115,7 +115,7 @@ def test_cached_metadata_is_bound_to_loaded_version(native, source):
 
 
 def test_content_check_does_not_trust_unchanged_stat_values(native, monkeypatch):
-    from pb2023_eeg.utils import source_files
+    from memory_reactivation.utils import source_files
     ds = dataset(native)
     next(iter(loader(ds)))
     path = str(native.records[0].npz_path)

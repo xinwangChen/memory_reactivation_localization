@@ -29,18 +29,18 @@ python -m pip install -e '.[test]'
 
    每个 CV 目录包含 manifest 和各折的 split、normalization 资料。subject-CV 使用仅由训练被试估计的全局归一化。启用 Graph Laplacian 时，在配置中指定 `preprocessing.graph_laplacian.electrodes_npz`。配方默认读取 `data/preprocessed/electrodes/Exp1_electrodes.npz`。
 
-2. 选择配方训练一折。
+2. 提供训练配置并选择一折。
 
-   `configs/{choice,pitch}-{block,subject}.yaml` 提供四份基础主线配方。`configs/noise-pad/` 提供对应的噪声补边配方。`target_pitch_cnn_launch.yaml` 与 `target_pitch_transformer_launch.yaml` 提供编码器对照配方。
+   使用 `--config /path/to/train.yaml` 读取外部 YAML。配置包含 `data`、`model`、`train` 三个部分，可选 `plots`、`run` 和 `swanlab`。模型通过 `model.encoder` 指定编码器，`data` 指定 manifest、split、normalization 和缓存，`run.base_output_dir` 指定输出位置。
 
-   YAML 中的相对路径以配置文件所在目录为基准。`cv_split_dir` 指向 CV 根目录，`data` 指定 manifest、split、normalization 和缓存，`run.base_output_dir` 指定输出位置。根据实际数据目录编辑这些路径。模型和训练参数在各配方中显式记录。
+   相对路径以配置文件所在目录为基准。`cv_split_dir` 指向已生成的 CV 根目录。subject-CV 使用 `data.normalization_mode: train_global`，被试条件化使用 `model.subject_conditioning.mode: shared_plus_residual`。`noise_pad` 通过 centered-local Transformer 的 `model.encoder.boundary_mode` 启用。
 
    ```bash
    PB2023_SWANLAB_ENABLED=0 pb-eeg train \
-     --config configs/choice-block.yaml --task choice --cv-fold 0
+     --config /path/to/choice-block.yaml --task choice --cv-fold 0
 
    PB2023_SWANLAB_ENABLED=0 pb-eeg train \
-     --config configs/noise-pad/pitch-subject.yaml --task pitch --cv-fold 0
+     --config /path/to/pitch-subject.yaml --task pitch --cv-fold 0
    ```
 
    `--lag` 可以覆盖配方的 lag，lag 必须为非负整数。Target 使用固定时间轴，动态窗口候选支持一个有效长度。训练输出保存完整源码快照、解析后的配置、数据产物身份、样本清单、指标 CSV、`best_val.ckpt` 和 `last.ckpt`。
@@ -49,7 +49,7 @@ python -m pip install -e '.[test]'
 
    ```bash
    PB2023_SWANLAB_ENABLED=0 pb-eeg train \
-     --config configs/choice-block.yaml --task choice --cv-fold 0 \
+     --config /path/to/choice-block.yaml --task choice --cv-fold 0 \
      --resume-from /path/to/run/last.ckpt
    ```
 
@@ -62,7 +62,7 @@ python -m pip install -e '.[test]'
    ```
 
    ```python
-   from pb2023_eeg.artifacts.checkpoints import load_model, save_model
+   from memory_reactivation.artifacts.checkpoints import load_model, save_model
 
    loaded = load_model("/path/to/run/best_val.ckpt", device="cpu")
    model = loaded.model

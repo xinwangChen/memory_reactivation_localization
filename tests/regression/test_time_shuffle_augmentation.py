@@ -5,14 +5,14 @@ from unittest.mock import patch
 import pytest
 import torch
 
-from pb2023_eeg.training.augmentation import (
+from memory_reactivation.training.augmentation import (
     EEGInputAugmenter,
     NearFullNoiseAugmenter,
     _replace_with_noise,
     build_eeg_augmenter,
     build_target_eeg_augmenter,
 )
-from pb2023_eeg.training.common import validate_resume_config
+from memory_reactivation.training.common import validate_resume_config
 
 
 SHUFFLE_MODES = ['time_shuffle', 'time_shuffle_independent']

@@ -9,8 +9,8 @@ import pytest
 import torch
 import torch.nn.functional as F
 
-from pb2023_eeg.training.common import load_checkpoint, validate_resume_config
-from pb2023_eeg.training.target import (
+from memory_reactivation.training.common import load_checkpoint, validate_resume_config
+from memory_reactivation.training.target import (
     attention_topk_clean_time_loss,
     classification_branch_loss,
     export_target_outputs,
@@ -21,9 +21,9 @@ from pb2023_eeg.training.target import (
     resolve_focal_train_config,
     score_mode_for_loss_type,
 )
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.workflows.train import build_model
 from scripts import reexport_target_outputs
-from pb2023_eeg.training import trainer as target_training
+from memory_reactivation.training import trainer as target_training
 
 
 @pytest.mark.parametrize("classes,smoothing,sigma,pos_weight", [

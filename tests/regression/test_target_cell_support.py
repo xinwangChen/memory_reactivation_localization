@@ -6,10 +6,10 @@ import unittest
 import torch
 from torch import nn
 
-from pb2023_eeg.models.encoder import EEGEncoder
-from pb2023_eeg.models.target_decoder import TargetAttentionDecoder
-from pb2023_eeg.training.metrics import BalancedAccuracyAccumulator
-from pb2023_eeg.training.target import run_target_epoch
+from memory_reactivation.models.encoder import EEGEncoder
+from memory_reactivation.models.target_decoder import TargetAttentionDecoder
+from memory_reactivation.training.metrics import BalancedAccuracyAccumulator
+from memory_reactivation.training.target import run_target_epoch
 
 
 class _MaskedTargetModel(nn.Module):

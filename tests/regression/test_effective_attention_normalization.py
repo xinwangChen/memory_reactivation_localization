@@ -1,18 +1,18 @@
 """Effective-weight scaling preserves suppression and reaches every consumer."""
 from copy import deepcopy
-from pb2023_eeg.training import step as step_module
+from memory_reactivation.training import step as step_module
 import csv
 from unittest.mock import patch
 
 import pytest
 import torch
 
-from pb2023_eeg.models.encoder import EEGEncoder
-from pb2023_eeg.models.target_decoder import GatedTimeAttentionPooling, TargetAttentionDecoder
-from pb2023_eeg.training.common import validate_resume_config
-from pb2023_eeg.training.target import export_target_outputs, run_target_epoch
-from pb2023_eeg.training import trainer as training
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.models.encoder import EEGEncoder
+from memory_reactivation.models.target_decoder import GatedTimeAttentionPooling, TargetAttentionDecoder
+from memory_reactivation.training.common import validate_resume_config
+from memory_reactivation.training.target import export_target_outputs, run_target_epoch
+from memory_reactivation.training import trainer as training
+from memory_reactivation.workflows.train import build_model
 
 
 def make_model(**options):
@@ -136,7 +136,7 @@ def test_exports_store_actual_weights_and_pre_scaling_provenance(tmp_path):
 
 
 def test_training_auxiliary_losses_consume_actual_scaled_weights():
-    from pb2023_eeg.training.augmentation import EEGInputAugmenter
+    from memory_reactivation.training.augmentation import EEGInputAugmenter
     model = make_model(attention_effective_normalization='one_plus_mass')
     augmenter = EEGInputAugmenter(sample_interval_s=.01, probability=1., side='left',
         min_duration_s=.02, max_left_duration_s=.02)

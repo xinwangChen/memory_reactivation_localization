@@ -13,15 +13,16 @@ def worker(args):
         sys.path.insert(0, str(args.source))
         from scripts.train_target_decode import build_model
         from pb2023_eeg.training.target import fit_target_decoder
+        import pb2023_eeg as package
     else:
-        from pb2023_eeg.models.factory import build_model
-        from pb2023_eeg.training.trainer import fit_target_decoder
+        from memory_reactivation.models.factory import build_model
+        from memory_reactivation.training.trainer import fit_target_decoder
+        import memory_reactivation as package
     import random
     import numpy as np
     import torch
-    import pb2023_eeg
     expected = args.source or Path(__file__).resolve().parents[1]
-    assert Path(pb2023_eeg.__file__).resolve().is_relative_to(expected)
+    assert Path(package.__file__).resolve().is_relative_to(expected)
     torch.set_num_threads(1)
     encoder = dict(type=args.encoder, in_channels=2, latent_dim=4, dropout=.1)
     if args.encoder == "cnn":
@@ -68,7 +69,7 @@ def main():
         worker(args)
         return
     import torch
-    from pb2023_eeg.artifacts.provenance import implementation_identity
+    from memory_reactivation.artifacts.provenance import implementation_identity
     if args.source is None:
         parser.error("--source is required and must point to the external frozen implementation")
     source = args.source.expanduser().resolve()

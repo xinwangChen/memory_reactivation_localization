@@ -1,6 +1,6 @@
 """Post-gate softmax uses the actual weights and preserves pooling support."""
 from copy import deepcopy
-from pb2023_eeg.training import step as step_module
+from memory_reactivation.training import step as step_module
 import csv
 from pathlib import Path
 from unittest.mock import patch
@@ -9,12 +9,12 @@ import numpy as np
 import pytest
 import torch
 
-from pb2023_eeg.models.encoder import EEGEncoder
-from pb2023_eeg.models.target_decoder import GatedTimeAttentionPooling, TargetAttentionDecoder
-from pb2023_eeg.training.common import validate_resume_config
-from pb2023_eeg.training.target import export_target_outputs, run_target_epoch
-from pb2023_eeg.training import trainer as training
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.models.encoder import EEGEncoder
+from memory_reactivation.models.target_decoder import GatedTimeAttentionPooling, TargetAttentionDecoder
+from memory_reactivation.training.common import validate_resume_config
+from memory_reactivation.training.target import export_target_outputs, run_target_epoch
+from memory_reactivation.training import trainer as training
+from memory_reactivation.workflows.train import build_model
 
 
 def make_model(activation='tanh_plus_one', combination='multiply', **kwargs):
@@ -82,7 +82,7 @@ def test_zero_combined_weights_become_uniform_on_valid_support(masked):
 @pytest.mark.parametrize('combination', ['multiply', 'add'])
 def test_export_and_plot_identify_positive_final_weights(tmp_path, monkeypatch, activation, combination):
     from matplotlib.figure import Figure
-    from pb2023_eeg.workflows.report import _plot_attention
+    from memory_reactivation.workflows.report import _plot_attention
     model = make_model(activation, combination).eval()
     with torch.no_grad():
         model.attention.gate_proj.weight.zero_(); model.attention.gate_proj.weight[0, 0] = 1.
@@ -131,7 +131,7 @@ def test_softmax_respects_builder_and_resume_identity():
 
 
 def test_softmax_loss_and_topq_consume_final_weights():
-    from pb2023_eeg.training.augmentation import EEGInputAugmenter
+    from memory_reactivation.training.augmentation import EEGInputAugmenter
     model = make_model(pool_valid_context_only=True, attention_score_centering=True, attention_gate_centering=True)
     augmenter = EEGInputAugmenter(sample_interval_s=.01, probability=1., side='left',
         min_duration_s=.02, max_left_duration_s=.02)

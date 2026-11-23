@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pb2023-eeg"
+name = "memory-reactivation"
 version = "0.1.0"
 description = "Unified PB2023 EEG models, training and evaluation"
 requires-python = ">=3.10"
@@ -14,11 +14,11 @@ test = ["pytest"]
 logging = ["swanlab"]
 
 [project.scripts]
-pb-eeg = "pb2023_eeg.cli:main"
+pb-eeg = "memory_reactivation.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pb2023_eeg*"]
+include = ["memory_reactivation*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

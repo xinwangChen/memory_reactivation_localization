@@ -6,12 +6,12 @@ import pytest
 import torch
 from torch import nn
 
-from pb2023_eeg.training.augmentation import (
+from memory_reactivation.training.augmentation import (
     EEGInputAugmenter, NearFullNoiseAugmenter, TemporalCropNoiseResult,
     _replace_with_noise, build_eeg_augmenter, build_target_eeg_augmenter,
     normalize_noise_mode_probabilities,
 )
-from pb2023_eeg.training.common import validate_resume_config
+from memory_reactivation.training.common import validate_resume_config
 
 SHARED = 'time_shuffle'
 INDEPENDENT = 'time_shuffle_independent'
@@ -88,7 +88,7 @@ def test_routing_chooses_once_per_active_trial_and_uses_original_whole_batch():
     probabilities = MIXTURES[-1]
     original = _replace_with_noise
     with patch('torch.multinomial', return_value=choices) as draw:
-        with patch('pb2023_eeg.training.augmentation._replace_with_noise', wraps=original) as spy:
+        with patch('memory_reactivation.training.augmentation._replace_with_noise', wraps=original) as spy:
             actual = replace(eeg, mask, probabilities)
     draw.assert_called_once()
     assert draw.call_args.args[1] == 5 and draw.call_args.kwargs['replacement'] is True

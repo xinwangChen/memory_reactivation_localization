@@ -1,27 +1,23 @@
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
 
 import torch
 
-from pb2023_eeg.models.classification_heads import SharedTaskClassifier
-from pb2023_eeg.models.encoder import EEGEncoder
-from pb2023_eeg.models.target_decoder import TargetAttentionDecoder
-from pb2023_eeg.utils.config import load_yaml
-from pb2023_eeg.workflows.train import (
+from memory_reactivation.models.classification_heads import SharedTaskClassifier
+from memory_reactivation.models.encoder import EEGEncoder
+from memory_reactivation.models.target_decoder import TargetAttentionDecoder
+from regression.helpers_smoke import target_test_config
+from memory_reactivation.workflows.train import (
     build_model,
     resolve_dataset_time_axis,
     resolved_time_axis_metadata,
 )
-from pb2023_eeg.workflows.reexport import (
+from memory_reactivation.workflows.reexport import (
     resolve_checkpoint_n_subjects,
     resolve_model_config_for_checkpoint,
     resolve_reexport_splits,
 )
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _encoder() -> EEGEncoder:
@@ -335,21 +331,14 @@ class TargetMultiheadModelTest(unittest.TestCase):
                 time_point_count=11,
             )
 
-    def test_primary_pitch_configs_keep_no_class_multihead_contract(self) -> None:
-        config_names = (
-            "target_pitch_cnn_launch.yaml",
-            "target_pitch_transformer_launch.yaml",
-        )
-        for config_name in config_names:
-            with self.subTest(config=config_name):
-                config = load_yaml(PROJECT_ROOT / "configs" / config_name)
+    def test_encoder_variants_keep_no_class_multihead_contract(self) -> None:
+        for encoder_type in ("cnn", "window_transformer"):
+            with self.subTest(encoder=encoder_type):
+                config = target_test_config("pitch", "block", encoder_type)
                 model_config = config["model"]
-                train_config = config["train"]
-                model = build_model(
-                    model_config,
-                    n_subjects=30,
-                    time_point_count=275,
-                )
+                model_config["time_head_mode"] = "independent_linear"
+                model = build_model(model_config, n_subjects=30, time_point_count=275,
+                                    input_channels=64)
 
                 self.assertEqual(model.time_head_mode, "independent_linear")
                 self.assertTrue(model.time_no_class_enabled)
@@ -370,40 +359,6 @@ class TargetMultiheadModelTest(unittest.TestCase):
                 self.assertIsNone(model.fusion)
                 self.assertIsNone(model.fusion_heads)
 
-                self.assertGreater(float(train_config["time_loss_weight"]), 0.0)
-                self.assertGreater(float(train_config["pooled_loss_weight"]), 0.0)
-                self.assertEqual(float(train_config["fusion_loss_weight"]), 0.0)
-                self.assertEqual(float(train_config["invalid_time_loss_weight"]), 0.0)
-                self.assertEqual(
-                    float(train_config["attention_mask_penalty_weight"]),
-                    0.1,
-                )
-                self.assertEqual(
-                    train_config["attention_mask_penalty_mode"],
-                    "absolute_effective_mass",
-                )
-                self.assertAlmostEqual(
-                    float(train_config["non_topq_time_loss_probability"]),
-                    0.1,
-                )
-                self.assertGreater(
-                    int(train_config["all_time_head_warmup_iterations"]),
-                    0,
-                )
-
-                noise_config = train_config["temporal_crop_noise"]
-                self.assertTrue(noise_config["enabled"])
-                self.assertEqual(noise_config["geometry"], "random_blocks")
-                self.assertEqual(noise_config["noise_mode"], "sample_channel")
-                self.assertEqual(noise_config["supervision_mode"], "all_positions")
-                self.assertEqual(float(noise_config["probability"]), 0.5)
-                self.assertEqual(int(noise_config["min_blocks"]), 1)
-                self.assertEqual(int(noise_config["max_blocks"]), 3)
-                self.assertEqual(float(noise_config["min_block_duration_s"]), 0.03)
-                self.assertEqual(float(noise_config["min_total_duration_s"]), 0.1)
-                self.assertEqual(float(noise_config["max_total_duration_s"]), 1.0)
-                self.assertEqual(float(noise_config["min_clean_gap_s"]), 0.03)
-                self.assertTrue(noise_config["allow_edge_blocks"])
 
     def test_builder_falls_back_to_saved_time_point_count_and_rejects_conflict(self) -> None:
         config = {

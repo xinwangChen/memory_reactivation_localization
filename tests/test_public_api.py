@@ -8,14 +8,14 @@ import numpy as np
 import pytest
 import torch
 
-from pb2023_eeg.artifacts.checkpoints import load_model, save_model
-from pb2023_eeg.artifacts.exports import describe_export
-from pb2023_eeg.artifacts.provenance import digest, model_semantics
-from pb2023_eeg.contracts import PredictionSpec
-from pb2023_eeg.data.transforms import time_shuffle_eeg
-from pb2023_eeg.evaluation.export import export_target_outputs
-from pb2023_eeg.evaluation.predict import iter_predictions
-from pb2023_eeg.models.factory import build_model
+from memory_reactivation.artifacts.checkpoints import load_model, save_model
+from memory_reactivation.artifacts.exports import describe_export
+from memory_reactivation.artifacts.provenance import digest, model_semantics
+from memory_reactivation.contracts import PredictionSpec
+from memory_reactivation.data.transforms import time_shuffle_eeg
+from memory_reactivation.evaluation.export import export_target_outputs
+from memory_reactivation.evaluation.predict import iter_predictions
+from memory_reactivation.models.factory import build_model
 
 
 def configuration():
@@ -107,13 +107,13 @@ def test_installed_package_has_no_old_source_dependency(tmp_path):
     project = Path(__file__).resolve().parents[1]
     code = """
 import pathlib, sys
-import pb2023_eeg
-from pb2023_eeg.workflows import train, reexport
-from pb2023_eeg.artifacts.checkpoints import load_model
+import memory_reactivation
+from memory_reactivation.workflows import train, reexport
+from memory_reactivation.artifacts.checkpoints import load_model
 root = pathlib.Path(sys.argv[1])
 for name, module in tuple(sys.modules.items()):
-    if name == 'pb2023_eeg' or name.startswith('pb2023_eeg.'):
+    if name == 'memory_reactivation' or name.startswith('memory_reactivation.'):
         assert pathlib.Path(module.__file__).resolve().is_relative_to(root), (name, module.__file__)
 assert not any(name == 'scripts' or name.startswith('scripts.') for name in sys.modules)
 """
-    subprocess.run([sys.executable, "-c", code, str(project / "pb2023_eeg")], cwd=tmp_path, check=True)
+    subprocess.run([sys.executable, "-c", code, str(project / "memory_reactivation")], cwd=tmp_path, check=True)

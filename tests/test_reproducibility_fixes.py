@@ -12,18 +12,18 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 import yaml
 
-from pb2023_eeg.artifacts.checkpoints import load_model, save_model
-from pb2023_eeg.artifacts.exports import copy_verified_exports, describe_export
-from pb2023_eeg.artifacts.provenance import data_identity, digest
-from pb2023_eeg.config import parse_request
-from pb2023_eeg.contracts import PredictionSpec
-from pb2023_eeg.data.dataset import GlobalBatchSampler, LagDecodingDataset
-from pb2023_eeg.evaluation.export import export_target_outputs
-from pb2023_eeg.evaluation.predict import iter_predictions
-from pb2023_eeg.models.baselines.spatial import SpatialTrialDecoder
-from pb2023_eeg.models.factory import build_model
-from pb2023_eeg.workflows import evaluate, report
-from pb2023_eeg.workflows import train as train_workflow
+from memory_reactivation.artifacts.checkpoints import load_model, save_model
+from memory_reactivation.artifacts.exports import copy_verified_exports, describe_export
+from memory_reactivation.artifacts.provenance import data_identity, digest
+from memory_reactivation.config import parse_request
+from memory_reactivation.contracts import PredictionSpec
+from memory_reactivation.data.dataset import GlobalBatchSampler, LagDecodingDataset
+from memory_reactivation.evaluation.export import export_target_outputs
+from memory_reactivation.evaluation.predict import iter_predictions
+from memory_reactivation.models.baselines.spatial import SpatialTrialDecoder
+from memory_reactivation.models.factory import build_model
+from memory_reactivation.workflows import evaluate, report
+from memory_reactivation.workflows import train as train_workflow
 from regression.helpers_smoke import TargetPipelineSmokeTest
 
 
@@ -36,16 +36,16 @@ def config(channels=2, times=8):
 
 
 def test_source_drift_rejects_checkpoint_without_relabelling_or_replacing_it(tmp_path):
-    source = Path(__file__).resolve().parents[1] / "pb2023_eeg"
-    shutil.copytree(source, tmp_path / "pb2023_eeg", ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    source = Path(__file__).resolve().parents[1] / "memory_reactivation"
+    shutil.copytree(source, tmp_path / "memory_reactivation", ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     code = r'''
 import sys
 sys.path.insert(0, sys.argv[1])
 from pathlib import Path
 import torch
-import pb2023_eeg.training.step as step
-from pb2023_eeg.training.common import save_checkpoint
-from pb2023_eeg.artifacts.provenance import implementation_identity, runtime_implementation_identity
+import memory_reactivation.training.step as step
+from memory_reactivation.training.common import save_checkpoint
+from memory_reactivation.artifacts.provenance import implementation_identity, runtime_implementation_identity
 root = Path(sys.argv[1])
 assert Path(step.__file__).is_relative_to(root)
 model = torch.nn.Linear(2, 2)
@@ -75,7 +75,7 @@ assert file.read_bytes() == original
 
 @pytest.mark.parametrize("verified", [False, True])
 def test_resume_requires_import_time_identity_even_when_the_disk_hash_matches(tmp_path, monkeypatch, verified):
-    from pb2023_eeg.artifacts.provenance import runtime_implementation_identity
+    from memory_reactivation.artifacts.provenance import runtime_implementation_identity
     identity = runtime_implementation_identity()
     payload = {"implementation_sha256": identity["sha256"]}
     if verified:

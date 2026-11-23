@@ -1,6 +1,6 @@
 """Gate explorations retain the historical model and handle signed contributions."""
 from copy import deepcopy
-from pb2023_eeg.training import step as step_module
+from memory_reactivation.training import step as step_module
 import csv
 from itertools import product
 from unittest.mock import patch
@@ -9,13 +9,13 @@ import numpy as np
 import pytest
 import torch
 
-from pb2023_eeg.models.encoder import EEGEncoder
-from pb2023_eeg.models.target_decoder import GatedTimeAttentionPooling, TargetAttentionDecoder
-from pb2023_eeg.training import target as target_training
-from pb2023_eeg.training.augmentation import EEGInputAugmenter
-from pb2023_eeg.training.common import validate_resume_config
-from pb2023_eeg.workflows.reexport import resolve_model_config_for_checkpoint
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.models.encoder import EEGEncoder
+from memory_reactivation.models.target_decoder import GatedTimeAttentionPooling, TargetAttentionDecoder
+from memory_reactivation.training import target as target_training
+from memory_reactivation.training.augmentation import EEGInputAugmenter
+from memory_reactivation.training.common import validate_resume_config
+from memory_reactivation.workflows.reexport import resolve_model_config_for_checkpoint
+from memory_reactivation.workflows.train import build_model
 
 
 MODES = [
@@ -235,7 +235,7 @@ def test_signed_exports_keep_both_sign_and_non_cancelling_mass(tmp_path, combina
 
 def test_signed_mass_and_gate_plots_do_not_clip_negative_values(tmp_path, monkeypatch):
     from matplotlib.figure import Figure
-    from pb2023_eeg.workflows.report import _plot_attention, _subject_time_summary
+    from memory_reactivation.workflows.report import _plot_attention, _subject_time_summary
 
     rows = [dict(input_kind='real', subject_id=0, record_id=0, trial0=0, lag=1,
         time_index=i, time_s=i * .01, attention_weight=1 / 3,
@@ -260,7 +260,7 @@ def test_signed_mass_and_gate_plots_do_not_clip_negative_values(tmp_path, monkey
 
 
 def test_curve_diagnostics_use_trialwise_absolute_mass_before_averaging():
-    from pb2023_eeg.workflows.report import _attention_curve_diagnostics, _subject_time_summary
+    from memory_reactivation.workflows.report import _attention_curve_diagnostics, _subject_time_summary
 
     rows = []
     # Opposite trial contributions cancel at each time, but both trials have mass .6.

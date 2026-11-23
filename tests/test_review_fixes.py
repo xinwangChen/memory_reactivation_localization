@@ -13,12 +13,12 @@ import pytest
 import torch
 import yaml
 
-from pb2023_eeg.artifacts.exports import _model_sha256
-from pb2023_eeg.config import parse_request
-from pb2023_eeg.data.configured import build_lag_dataset
-from pb2023_eeg.data.dataset import normalize_lags
-from pb2023_eeg.training.common import load_checkpoint, recover_best_checkpoint
-from pb2023_eeg.workflows import reexport, train
+from memory_reactivation.artifacts.exports import _model_sha256
+from memory_reactivation.config import parse_request
+from memory_reactivation.data.configured import build_lag_dataset
+from memory_reactivation.data.dataset import normalize_lags
+from memory_reactivation.training.common import load_checkpoint, recover_best_checkpoint
+from memory_reactivation.workflows import reexport, train
 from regression.helpers_smoke import TargetPipelineSmokeTest
 
 
@@ -93,7 +93,7 @@ def test_rewind_publishes_only_weights_from_the_resumed_trajectory(trained_run, 
     assert [row["val_loss"] for row in rows] == [row["val_loss"] for row in original_rows[:iterations]]
     assert best["metrics"]["val_loss"] == min(float(row["val_loss"]) for row in rows)
     manifest = json.loads((clone / "val_export_manifest.json").read_text())
-    from pb2023_eeg.artifacts.checkpoints import load_model
+    from memory_reactivation.artifacts.checkpoints import load_model
     expected_model = load_model(clone / "best_val.ckpt").model
     assert manifest["parameters"]["model_state_sha256"] == _model_sha256(expected_model)
 

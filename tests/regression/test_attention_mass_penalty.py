@@ -1,23 +1,22 @@
 """One-sided mass gradients, full-noise routing, AMP and training/resume wiring."""
 from copy import deepcopy
-from pathlib import Path
 import csv
 import math
 
 import pytest
 import torch
 from torch import nn
-import yaml
+from regression.helpers_smoke import target_test_config
 
-from pb2023_eeg.training.attention_regularization import (
+from memory_reactivation.training.attention_regularization import (
     attention_mass_penalty,
     normalize_attention_mass_penalty_config,
 )
-from pb2023_eeg.training.augmentation import TemporalCropNoiseResult
-from pb2023_eeg.training.common import load_checkpoint, validate_resume_config
-from pb2023_eeg.training import trainer as training
-from pb2023_eeg.training.swanlab_logger import target_swanlab_metrics
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.training.augmentation import TemporalCropNoiseResult
+from memory_reactivation.training.common import load_checkpoint, validate_resume_config
+from memory_reactivation.training import trainer as training
+from memory_reactivation.training.swanlab_logger import target_swanlab_metrics
+from memory_reactivation.workflows.train import build_model
 
 
 @pytest.mark.parametrize('value', [None, True, False, 'bad', -.1, float('nan'), float('inf'), 10 ** 400])
@@ -274,7 +273,7 @@ def test_epoch_cropped_support_masks_and_unequal_batches_use_trial_mean():
 @pytest.mark.parametrize('validation', [False, True])
 def test_disabled_and_validation_paths_do_not_evaluate_new_penalty(monkeypatch, validation):
     def must_not_run(*args, **kwargs): raise AssertionError('Unexpected mass penalty computation')
-    monkeypatch.setattr('pb2023_eeg.training.step.attention_mass_penalty', must_not_run)
+    monkeypatch.setattr('memory_reactivation.training.step.attention_mass_penalty', must_not_run)
     examples = [batch()]
     rng = torch.get_rng_state()
     result = epoch(Probe(), examples, training_mode=not validation, weight=.7 if validation else 0.)
@@ -325,9 +324,8 @@ def test_mass_gradient_reaches_gate_scorer_and_encoder_without_changing_forward(
 
 @pytest.mark.parametrize('task', ['choice', 'pitch'])
 @pytest.mark.parametrize('protocol', ['block', 'subject'])
-def test_actual_baselines_fit_with_full275_and_record_loss_config_and_checkpoint(tmp_path, task, protocol):
-    path = Path(__file__).resolve().parents[2] / 'configs' / 'noise-pad' / f'{task}-{protocol}.yaml'
-    config = yaml.safe_load(path.read_text())
+def test_target_variants_fit_full275_and_record_loss_config_and_checkpoint(tmp_path, task, protocol):
+    config = target_test_config(task, protocol)
     config['model']['subject_conditioning']['resolved_training_subject_ids'] = list(range(24))
     config['train'].update(iterations=2, validation_interval_iterations=1, log_interval_iterations=1,
         lr_schedule_iterations=2, warmup_iterations=0, progress_bar=False, amp=False,

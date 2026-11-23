@@ -6,16 +6,16 @@ import pytest
 import torch
 from torch import nn
 
-from pb2023_eeg.training.augmentation import (
+from memory_reactivation.training.augmentation import (
     HierarchicalEEGAugmenter, TemporalCropNoiseResult, build_target_eeg_augmenter,
     normalize_augmentation_pipeline_config,
 )
-from pb2023_eeg.training.common import load_checkpoint, validate_resume_config
-from pb2023_eeg.training.target import (
+from memory_reactivation.training.common import load_checkpoint, validate_resume_config
+from memory_reactivation.training.target import (
     fit_target_decoder, run_target_epoch, target_augmentation_diagnostic_totals,
     finalize_target_augmentation_diagnostics,
 )
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.workflows.train import build_model
 
 
 MIXTURE = {'time_shuffle': .5, 'sample_channel': .25, 'time_shuffle_independent': .25}
@@ -200,7 +200,7 @@ def test_local_branch_executes_after_one_global_probability_draw():
 
 
 def test_replacement_reads_original_full_batch_once_after_both_coverages():
-    from pb2023_eeg.training import augmentation as module
+    from memory_reactivation.training import augmentation as module
     eeg = torch.randn(64, 3, 40)
     original = module._replace_with_noise
     calls = []
@@ -310,7 +310,7 @@ def test_resume_identity_handles_disabled_defaults_and_rejects_pipeline_changes(
 
 
 def test_new_branch_rates_are_mapped_to_swanlab():
-    from pb2023_eeg.training.swanlab_logger import target_swanlab_metrics
+    from memory_reactivation.training.swanlab_logger import target_swanlab_metrics
     result=target_swanlab_metrics({'train_roll_fraction':.16,'train_local_noise_fraction':.576,
         'train_near_full_noise_fraction_among_replacements':.1})
     assert result['train/augmentation/roll_fraction']==.16
@@ -379,7 +379,7 @@ def test_cuda_amp_training_and_validation_use_the_expected_branches(encoder_type
 
 @pytest.mark.parametrize('encoder_type',['cnn','window_transformer'])
 def test_cpu_fit_and_resume_reproduce_with_all_hierarchical_branches(tmp_path,monkeypatch,encoder_type):
-    from pb2023_eeg.training import trainer as module
+    from memory_reactivation.training import trainer as module
     encoder=dict(type=encoder_type,in_channels=2,latent_dim=4,dropout=.1)
     if encoder_type=='cnn':encoder.update(num_blocks=1,kernel_size=3,expansion_ratio=1)
     else:encoder.update(num_layers=1,window_size=3,num_heads=2,ffn_ratio=2,

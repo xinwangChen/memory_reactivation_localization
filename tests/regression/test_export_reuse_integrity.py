@@ -10,11 +10,11 @@ import pytest
 import torch
 import yaml
 
-from pb2023_eeg.artifacts import exports as export_integrity
-from pb2023_eeg.training.export_integrity import describe_export
-from pb2023_eeg.training.target import export_target_outputs
-from pb2023_eeg.workflows.reexport import copy_existing_target_exports
-from pb2023_eeg.workflows.train import build_model as build_target
+from memory_reactivation.artifacts import exports as export_integrity
+from memory_reactivation.training.export_integrity import describe_export
+from memory_reactivation.training.target import export_target_outputs
+from memory_reactivation.workflows.reexport import copy_existing_target_exports
+from memory_reactivation.workflows.train import build_model as build_target
 
 
 def contents(directory):
@@ -180,7 +180,7 @@ def test_failed_fresh_export_keeps_previous_csvs_and_provenance(exports, monkeyp
     decoder, export, _, create = exports
     arguments = create()
     before = contents(arguments['output_dir'])
-    module = importlib.import_module('pb2023_eeg.evaluation.export')
+    module = importlib.import_module('memory_reactivation.evaluation.export')
     original = module.write_rows_csv
     def fail_late(path, rows):
         if path.name.endswith('time_cell_summary.csv'):
@@ -222,11 +222,11 @@ def test_real_training_and_cli_reuse_validate_parameters_and_preserve_failed_out
         filename.write_text(yaml.safe_dump(config))
         monkeypatch.setenv('PB2023_SKIP_CODE_SNAPSHOT', '1')
         monkeypatch.setenv('PB2023_SWANLAB_ENABLED', '0')
-        training = importlib.import_module('pb2023_eeg.workflows.train')
+        training = importlib.import_module('memory_reactivation.workflows.train')
         monkeypatch.setattr(sys, 'argv', ['train', '--config', str(filename), '--task', 'choice', '--lag', '1'])
         training.main()
         run = next((tmp_path/'runs').rglob('best_val.ckpt')).parent
-        reexport = importlib.import_module('pb2023_eeg.workflows.reexport')
+        reexport = importlib.import_module('memory_reactivation.workflows.reexport')
         # Disable only rendering; inference and all file checks run normally.
         monkeypatch.setattr(reexport, 'plot_target_conditions', lambda *args, **kwargs: None)
         # Reuse the untouched training export before generating any reexports.

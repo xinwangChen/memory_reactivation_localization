@@ -6,13 +6,13 @@ import unittest
 import torch
 from torch import nn
 
-from pb2023_eeg.models.encoder import (
+from memory_reactivation.models.encoder import (
     EEGEncoder,
     RightLocalTransformerBlock,
     TemporalPatchMLPBlock,
     build_eeg_encoder,
 )
-from pb2023_eeg.models.target_decoder import TargetAttentionDecoder
+from memory_reactivation.models.target_decoder import TargetAttentionDecoder
 
 
 def _window_encoder(

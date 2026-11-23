@@ -8,12 +8,12 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import torch
 
-from pb2023_eeg.training.target import (
+from memory_reactivation.training.target import (
     export_target_outputs,
     time_roll_eeg,
     time_shuffle_eeg,
 )
-from pb2023_eeg.workflows.report import (
+from memory_reactivation.workflows.report import (
     _add_event_markers,
     load_plot_config,
     normalize_plot_input_kinds,
@@ -23,7 +23,7 @@ from pb2023_eeg.workflows.report import (
     resolve_plot_config,
     resolve_plot_time_axis_limits,
 )
-from pb2023_eeg.workflows.reexport import resolve_time_roll_shift_samples
+from memory_reactivation.workflows.reexport import resolve_time_roll_shift_samples
 
 
 class _FixedPitchTargetModel(torch.nn.Module):

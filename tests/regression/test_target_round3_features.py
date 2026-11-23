@@ -6,11 +6,11 @@ from pathlib import Path
 
 import torch
 
-from pb2023_eeg.models.encoder import EEGEncoder
-from pb2023_eeg.models.target_decoder import TargetAttentionDecoder
-from pb2023_eeg.training.common import trainable_parameters
-from pb2023_eeg.training.target import fit_target_decoder, run_target_epoch
-from pb2023_eeg.workflows.train import (
+from memory_reactivation.models.encoder import EEGEncoder
+from memory_reactivation.models.target_decoder import TargetAttentionDecoder
+from memory_reactivation.training.common import trainable_parameters
+from memory_reactivation.training.target import fit_target_decoder, run_target_epoch
+from memory_reactivation.workflows.train import (
     configure_target_freezing,
     load_pretrained_dpc_components,
     resolve_export_splits,

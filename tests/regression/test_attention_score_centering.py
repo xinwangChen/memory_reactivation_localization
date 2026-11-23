@@ -6,15 +6,15 @@ from unittest.mock import patch
 
 import torch
 
-from pb2023_eeg.models.encoder import EEGEncoder
-from pb2023_eeg.models.target_decoder import (
+from memory_reactivation.models.encoder import EEGEncoder
+from memory_reactivation.models.target_decoder import (
     GatedTimeAttentionPooling,
     TargetAttentionDecoder,
     TimeAttentionPooling,
 )
-from pb2023_eeg.training.common import validate_resume_config
-from pb2023_eeg.workflows.reexport import resolve_model_config_for_checkpoint
-from pb2023_eeg.workflows.train import build_model
+from memory_reactivation.training.common import validate_resume_config
+from memory_reactivation.workflows.reexport import resolve_model_config_for_checkpoint
+from memory_reactivation.workflows.train import build_model
 
 
 def _encoder() -> EEGEncoder:
